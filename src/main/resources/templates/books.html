@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout.html}">
+<head>
+    <title>Danh Sách Sách</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div layout:fragment="content">
+    <h2 class="mb-4">Danh Sách Sách</h2>
+    <div class="mb-3">
+        <a href="/books/add" class="btn btn-primary">Thêm Sách Mới</a>
+    </div>
+    
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Tiêu đề</th>
+                <th>Tác giả</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="book : ${books}">
+                <td th:text="${book.id}"></td>
+                <td th:text="${book.title}"></td>
+                <td th:text="${book.author}"></td>
+                <td>
+                    <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn btn-warning btn-sm">Sửa</a>
+                    <a th:href="@{/books/delete/{id}(id=${book.id})}" class="btn btn-danger btn-sm">Xóa</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
