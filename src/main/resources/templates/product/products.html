@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{_layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>List products</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container body-content mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Product Management</h2>
+            <a th:href="@{/products/create}" class="btn btn-primary">Create New Product</a>
+        </div>
+        
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Price</th>
+                    <th scope="col" class="text-center">Image</th>
+                    <th scope="col">Category Name</th>
+                    <th scope="col" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="product : ${listproduct}">
+                    <th scope="row" th:text="${product.id}"></th>
+                    <td th:text="${product.name}"></td>
+                    <td th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td>
+                    <td class="text-center">
+                        <img th:src="@{/images/{name}(name=${product.image})}" 
+                             class="img-thumbnail" 
+                             style="width: 100px; height: 80px; object-fit: cover;" 
+                             alt="Product Image"
+                             onerror="this.src='/images/default.jpg';"> 
+                    </td>
+                    <td th:text="${product.category?.name ?: 'N/A'}"></td>
+                    <td class="text-center">
+                        <a th:href="@{/products/edit/{id}(id=${product.id})}" 
+                           class="btn btn-sm btn-secondary me-2">Edit</a>
+                        
+                        <a th:href="@{/products/delete/{id}(id=${product.id})}" 
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
