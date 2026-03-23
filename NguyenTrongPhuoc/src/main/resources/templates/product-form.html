@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${formTitle + ' - Product Hub'}">Sản phẩm - Product Hub</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
+</head>
+<body class="theme-form-product site-shell">
+<header class="site-header">
+    <div class="header-inner">
+        <div class="header-brand">
+            <p class="eyebrow">Product Hub</p>
+            <h1 class="brand" th:text="${formTitle}">Thêm sản phẩm</h1>
+            <p class="header-note">Tạo hoặc cập nhật sản phẩm.</p>
+        </div>
+
+        <nav class="header-nav">
+            <a class="nav-link" th:href="@{/}">Dashboard</a>
+            <a class="nav-link current" th:href="@{/products}">Sản phẩm</a>
+            <a class="nav-link" th:href="@{/categories}">Danh mục</a>
+            <a class="nav-link" th:href="@{/prices}">Bảng giá</a>
+        </nav>
+
+        <div class="header-actions">
+            <a class="btn btn-light" th:href="@{/products}">Quay lại danh sách</a>
+        </div>
+    </div>
+</header>
+
+<main class="page form-workspace">
+    <section class="form-layout">
+        <aside class="glass-panel form-sidebar">
+            <div class="form-intro">
+                <span class="badge">Sản phẩm</span>
+                <h2 th:text="${formTitle}">Thêm sản phẩm</h2>
+                <p th:text="${#strings.startsWith(formTitle, 'Thêm') ? 'Nhập thông tin cơ bản để tạo sản phẩm mới.' : 'Cập nhật thông tin sản phẩm hiện có.'}">
+                    Nhập thông tin cơ bản để tạo sản phẩm mới.
+                </p>
+            </div>
+
+            <article class="form-note-card">
+                <h3>Lưu ý</h3>
+                <ul class="guide-list">
+                    <li>SKU không trùng với mã đang có.</li>
+                    <li>Tên sản phẩm cần đủ rõ.</li>
+                    <li>Chọn đúng danh mục.</li>
+                </ul>
+            </article>
+
+            <article class="form-note-card">
+                <h3>Sau khi lưu</h3>
+                <ul class="guide-list">
+                    <li>Kiểm tra lại thông tin vừa nhập.</li>
+                    <li>Nếu cần, chuyển sang bảng giá để thêm giá bán.</li>
+                    <li>Dùng trạng thái hoạt động để kiểm soát hiển thị.</li>
+                </ul>
+            </article>
+        </aside>
+
+        <section class="glass-panel form-main">
+            <div class="form-intro">
+                <span class="page-marker">Biểu mẫu</span>
+                <h2>Thông tin sản phẩm</h2>
+                <p class="subtitle">Nhập SKU, tên, danh mục, mô tả và trạng thái.</p>
+            </div>
+
+            <form class="form-grid" th:action="${formAction}" method="post" th:object="${product}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                <div class="grid-2">
+                    <div>
+                        <label for="sku">SKU</label>
+                        <input type="text" id="sku" th:field="*{sku}" placeholder="Ví dụ: IP15-128-BLK">
+                        <p class="field-error" th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}"></p>
+                    </div>
+                    <div>
+                        <label for="name">Tên sản phẩm</label>
+                        <input type="text" id="name" th:field="*{name}" placeholder="Ví dụ: iPhone 15 128GB">
+                        <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="categoryId">Danh mục</label>
+                    <select id="categoryId" name="categoryId">
+                        <option value="">-- Chọn danh mục --</option>
+                        <option th:each="category : ${categories}"
+                                th:value="${category.id}"
+                                th:text="${category.name}"
+                                th:selected="${selectedCategoryId != null and selectedCategoryId == category.id}">
+                        </option>
+                    </select>
+                    <p class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></p>
+                </div>
+
+                <div>
+                    <label for="description">Mô tả</label>
+                    <textarea id="description" th:field="*{description}" rows="5"
+                              placeholder="Thông tin nổi bật, cấu hình, ghi chú ngắn về sản phẩm..."></textarea>
+                    <p class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></p>
+                </div>
+
+                <div class="check-line">
+                    <input type="checkbox" id="active" th:field="*{active}">
+                    <label for="active">Sản phẩm đang hoạt động</label>
+                </div>
+
+                <div class="actions">
+                    <button class="btn" type="submit" th:text="${submitLabel}">Lưu</button>
+                    <a class="btn btn-light" th:href="@{/products}">Quay lại</a>
+                    <a class="btn btn-secondary" th:href="@{/prices}">Đi tiếp sang bảng giá</a>
+                </div>
+            </form>
+        </section>
+    </section>
+</main>
+</body>
+</html>

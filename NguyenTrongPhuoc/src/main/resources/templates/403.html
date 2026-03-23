@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 - Không có quyền truy cập</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
+</head>
+<body class="theme-error">
+<main class="error-wrap">
+    <section class="glass-panel error-panel">
+        <div class="error-icon">403</div>
+        <span class="badge">Access Restricted</span>
+        <h1>Bạn không có quyền truy cập trang này.</h1>
+
+        <p class="subtitle" sec:authorize="hasRole('CUSTOMER')">
+            Tài khoản customer chỉ được xem trang sản phẩm và giỏ hàng.
+        </p>
+        <p class="subtitle" sec:authorize="hasRole('STAFF') and !hasRole('ADMIN')">
+            Tài khoản staff chỉ có quyền xem dữ liệu. Các thao tác tạo, sửa và xóa dành cho admin.
+        </p>
+        <p class="subtitle" sec:authorize="hasRole('ADMIN')">
+            Hãy quay lại khu vực phù hợp và thử lại.
+        </p>
+
+        <div class="error-actions">
+            <a class="btn" th:href="@{/products}">Xem sản phẩm</a>
+            <a class="btn btn-light" sec:authorize="hasAnyRole('ADMIN','STAFF')" th:href="@{/}">Về dashboard</a>
+            <a class="btn btn-secondary" sec:authorize="hasRole('STAFF') and !hasRole('ADMIN')" th:href="@{/prices}">Xem bảng giá</a>
+            <a class="btn btn-secondary" sec:authorize="hasRole('ADMIN')" th:href="@{/categories}">Sang danh mục</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

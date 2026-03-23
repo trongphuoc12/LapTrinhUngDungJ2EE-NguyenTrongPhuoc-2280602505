@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${formTitle + ' - Product Hub'}">Bảng giá - Product Hub</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
+</head>
+<body class="theme-form-price site-shell">
+<header class="site-header">
+    <div class="header-inner">
+        <div class="header-brand">
+            <p class="eyebrow">Product Hub</p>
+            <h1 class="brand" th:text="${formTitle}">Thêm dòng bảng giá</h1>
+            <p class="header-note">Tạo hoặc cập nhật dòng giá.</p>
+        </div>
+
+        <nav class="header-nav">
+            <a class="nav-link" th:href="@{/}">Dashboard</a>
+            <a class="nav-link" th:href="@{/products}">Sản phẩm</a>
+            <a class="nav-link" th:href="@{/categories}">Danh mục</a>
+            <a class="nav-link current" th:href="@{/prices}">Bảng giá</a>
+        </nav>
+
+        <div class="header-actions">
+            <a class="btn btn-light" th:href="@{/prices}">Quay lại bảng giá</a>
+        </div>
+    </div>
+</header>
+
+<main class="page form-workspace">
+    <section class="form-layout">
+        <aside class="glass-panel form-sidebar">
+            <div class="form-intro">
+                <span class="badge">Bảng giá</span>
+                <h2 th:text="${formTitle}">Thêm dòng bảng giá</h2>
+                <p th:text="${#strings.startsWith(formTitle, 'Thêm') ? 'Nhập thông tin để tạo dòng giá mới.' : 'Cập nhật thông tin của dòng giá hiện có.'}">
+                    Nhập thông tin để tạo dòng giá mới.
+                </p>
+            </div>
+
+            <article class="form-note-card">
+                <h3>Lưu ý</h3>
+                <ul class="guide-list">
+                    <li>Chọn đúng sản phẩm và loại giá.</li>
+                    <li>Kiểm tra ngày hiệu lực.</li>
+                    <li>Nhập đúng đơn vị tiền tệ.</li>
+                </ul>
+            </article>
+
+            <article class="form-note-card">
+                <h3>Sau khi lưu</h3>
+                <ul class="guide-list">
+                    <li>Kiểm tra lại giá vừa nhập.</li>
+                    <li>Đối chiếu ngày áp dụng.</li>
+                    <li>Xem danh sách bảng giá để xác nhận.</li>
+                </ul>
+            </article>
+        </aside>
+
+        <section class="glass-panel form-main">
+            <div class="form-intro">
+                <span class="page-marker">Biểu mẫu</span>
+                <h2>Thông tin dòng bảng giá</h2>
+                <p class="subtitle">Nhập sản phẩm, loại giá, ngày hiệu lực, giá và tiền tệ.</p>
+            </div>
+
+            <form class="form-grid" th:action="${formAction}" method="post" th:object="${priceEntry}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                <div>
+                    <label for="productId">Sản phẩm</label>
+                    <select id="productId" name="productId">
+                        <option value="">-- Chọn sản phẩm --</option>
+                        <option th:each="product : ${products}"
+                                th:value="${product.id}"
+                                th:text="${product.name + ' (' + product.sku + ')'}"
+                                th:selected="${selectedProductId != null and selectedProductId == product.id}">
+                        </option>
+                    </select>
+                    <p class="field-error" th:if="${#fields.hasErrors('product')}" th:errors="*{product}"></p>
+                </div>
+
+                <div class="grid-2">
+                    <div>
+                        <label for="priceType">Loại giá</label>
+                        <select id="priceType" th:field="*{priceType}">
+                            <option value="">-- Chọn loại giá --</option>
+                            <option th:each="type : ${priceTypes}" th:value="${type}" th:text="${type.label}"></option>
+                        </select>
+                        <p class="field-error" th:if="${#fields.hasErrors('priceType')}" th:errors="*{priceType}"></p>
+                    </div>
+                    <div>
+                        <label for="effectiveDate">Ngày hiệu lực</label>
+                        <input type="date" id="effectiveDate" th:field="*{effectiveDate}">
+                        <p class="field-error" th:if="${#fields.hasErrors('effectiveDate')}" th:errors="*{effectiveDate}"></p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div>
+                        <label for="price">Giá</label>
+                        <input type="number" id="price" th:field="*{price}" step="0.01" min="0.01" placeholder="Ví dụ: 21990000">
+                        <p class="field-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></p>
+                    </div>
+                    <div>
+                        <label for="currency">Tiền tệ</label>
+                        <input type="text" id="currency" th:field="*{currency}" maxlength="3" placeholder="VND">
+                        <p class="field-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="note">Ghi chú</label>
+                    <textarea id="note" th:field="*{note}" rows="4"
+                              placeholder="Ví dụ: áp dụng kênh online quý II hoặc chương trình showroom"></textarea>
+                    <p class="field-error" th:if="${#fields.hasErrors('note')}" th:errors="*{note}"></p>
+                </div>
+
+                <div class="actions">
+                    <button class="btn" type="submit" th:text="${submitLabel}">Lưu</button>
+                    <a class="btn btn-light" th:href="@{/prices}">Quay lại</a>
+                    <a class="btn btn-secondary" th:href="@{/products}">Kiểm tra sản phẩm</a>
+                </div>
+            </form>
+        </section>
+    </section>
+</main>
+</body>
+</html>

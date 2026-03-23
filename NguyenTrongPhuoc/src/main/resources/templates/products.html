@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Sản phẩm</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.5; color: #333; }
+        header { border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px; }
+        nav a { margin-right: 15px; color: blue; text-decoration: none; font-weight: bold; }
+        
+        /* Bảng dữ liệu */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #999; padding: 10px; text-align: left; }
+        th { background-color: #f0f0f0; }
+        tr:nth-child(even) { background-color: #fafafa; }
+        
+        /* Bộ lọc */
+        .filter-container { background: #eee; padding: 15px; border: 1px solid #ccc; margin-bottom: 20px; }
+        .filter-group { display: inline-block; margin-right: 15px; }
+        
+        /* Trạng thái & Nút */
+        .status-on { color: green; font-weight: bold; }
+        .status-off { color: red; }
+        .btn { padding: 5px 10px; cursor: pointer; text-decoration: none; display: inline-block; border: 1px solid #666; background: #f9f9f9; color: #000; }
+        .btn-add { background: #28a745; color: #fff; border: none; }
+        .btn-danger { color: red; border-color: red; background: none; }
+        
+        /* Thông báo */
+        .msg { padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; }
+        .msg-ok { background: #d4edda; color: #155724; }
+        .msg-err { background: #f8d7da; color: #721c24; }
+        
+        .pagination { margin-top: 20px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Danh sách sản phẩm</h1>
+    <p>
+        Tài khoản: <strong sec:authentication="name">User</strong> | 
+        Giỏ hàng: <strong th:text="${cartItemCount}">0</strong> món
+    </p>
+    <nav>
+        <a sec:authorize="hasAnyRole('ADMIN','STAFF')" th:href="@{/}">Dashboard</a>
+        <a th:href="@{/products}" style="text-decoration: underline;">Sản phẩm</a>
+        <a sec:authorize="hasAnyRole('ADMIN','STAFF')" th:href="@{/categories}">Danh mục</a>
+        <a th:href="@{/cart}">Giỏ hàng</a>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit">Đăng xuất</button>
+        </form>
+    </nav>
+</header>
+
+<main>
+    <div class="msg msg-ok" th:if="${successMessage}" th:text="${successMessage}"></div>
+    <div class="msg msg-err" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+    <section class="filter-container">
+        <form th:action="@{/products}" method="get">
+            <div class="filter-group">
+                <label>Từ khóa:</label>
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm theo tên...">
+            </div>
+
+            <div class="filter-group">
+                <label>Danh mục:</label>
+                <select name="categoryId">
+                    <option value="">-- Tất cả --</option>
+                    <option th:each="cat : ${categories}" 
+                            th:value="${cat.id}" 
+                            th:text="${cat.name}"
+                            th:selected="${cat.id == selectedCategoryId}"></option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Sắp xếp:</label>
+                <select name="sort">
+                    <option value="newest" th:selected="${selectedSort == 'newest'}">Mới nhất</option>
+                    <option value="priceAsc" th:selected="${selectedSort == 'priceAsc'}">Giá tăng dần</option>
+                    <option value="priceDesc" th:selected="${selectedSort == 'priceDesc'}">Giá giảm dần</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn">Lọc dữ liệu</button>
+            <a th:href="@{/products}" class="btn">Xóa lọc</a>
+        </form>
+    </section>
+
+    <div style="margin-bottom: 15px;" sec:authorize="hasRole('ADMIN')">
+        <a th:href="@{/products/new}" class="btn btn-add">+ THÊM SẢN PHẨM</a>
+    </div>
+
+    <div th:if="${catalogPage != null and !catalogPage.empty}">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>SKU</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Giá</th>
+                    <th>Trạng thái</th>
+                    <th>Mua</th>
+                    <th sec:authorize="hasRole('ADMIN')">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${catalogPage.items}">
+                    <td th:text="${item.id}">1</td>
+                    <td th:text="${item.sku}">SKU-001</td>
+                    <td>
+                        <strong th:text="${item.name}">Tên</strong><br>
+                        <small th:text="${item.description}">Mô tả</small>
+                    </td>
+                    <td th:text="${item.categoryName}">Category</td>
+                    <td>
+                        <span th:if="${item.currentPrice != null}" 
+                              th:text="${#numbers.formatDecimal(item.currentPrice, 0, 'COMMA', 0, 'POINT') + ' VND'}"></span>
+                        <em th:if="${item.currentPrice == null}">Chưa có giá</em>
+                    </td>
+                    <td>
+                        <span th:class="${item.active ? 'status-on' : 'status-off'}"
+                              th:text="${item.active ? 'Đang bán' : 'Ngừng bán'}"></span>
+                    </td>
+                    <td>
+                        <form th:if="${item.currentPrice != null}" th:action="@{/cart/add}" method="post">
+                            <input type="hidden" name="productId" th:value="${item.id}">
+                            <input type="number" name="quantity" value="1" min="1" style="width: 45px;">
+                            <button type="submit" class="btn">Thêm</button>
+                        </form>
+                    </td>
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/products/{id}/edit(id=${item.id})}" class="btn">Sửa</a>
+                        <form th:action="@{/products/{id}/delete(id=${item.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Xóa sản phẩm này?')">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination" th:if="${catalogPage.totalPages > 1}">
+            <a class="btn" th:if="${catalogPage.hasPrevious}" 
+               th:href="@{/products(page=${catalogPage.currentPage - 1}, keyword=${keyword}, categoryId=${selectedCategoryId}, sort=${selectedSort})}">
+               &laquo; Trước
+            </a>
+            
+            <span> Trang <b th:text="${catalogPage.currentPage}"></b> / <span th:text="${catalogPage.totalPages}"></span> </span>
+
+            <a class="btn" th:if="${catalogPage.hasNext}" 
+               th:href="@{/products(page=${catalogPage.currentPage + 1}, keyword=${keyword}, categoryId=${selectedCategoryId}, sort=${selectedSort})}">
+               Sau &raquo;
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${catalogPage == null or catalogPage.empty}" style="text-align: center; padding: 40px; border: 1px dashed #ccc;">
+        <p>Không tìm thấy sản phẩm nào phù hợp với từ khóa "<b>[[${keyword}]]</b>".</p>
+        <a th:href="@{/products}">Quay lại danh sách đầy đủ</a>
+    </div>
+</main>
+
+<footer style="margin-top: 50px; font-size: 0.8em; color: #777; border-top: 1px solid #eee; padding-top: 10px;">
+    <p>&copy; 2026 - HUTECH - Nguyễn Trọng Phước</p>
+</footer>
+
+</body>
+</html>
